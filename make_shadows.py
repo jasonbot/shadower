@@ -67,6 +67,32 @@ class MakeShadows(object):
     def execute(self, parameters, messages):
         raise NotImplementedError("Sorry.")
 
+def geometry_slices(geometry, xadd, yadd):
+    for pt in geometry.getPart(0):
+        yield (pt, arcpy.Point(pt.X + xadd, pt.Y + yadd))
+        if pt is None:
+            return
+
+def window(iterator, window_size):
+    window = ()
+    for item in iterator:
+        window += (item,)
+        if len(window) >= window_size:
+            yield window
+            window = window[1:]
+
+def shadow_geometry(geometry, xadd, yadd, in_sr):
+    parts = []
+    for w1, w2 in window(geometry_slices(geometry)):
+        pt1, pt2 = w1
+        pt3, pt4 = w2
+        parts.append(
+            arcpy.Polygon(
+                arcpy.Array(
+                    arcpy.Array([pt1, pt2, pt3, pt4, pt1])),
+                in_sr))
+    return reduce(lambda x, y: x.union(y), parts)
+
 def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
     in_sr = arcpy.Describe(in_fc).spatialReference
     arcpy.management.CreateFeatureclass(os.path.dirname(out_fc),
@@ -81,4 +107,4 @@ def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
     with arcpy.da.SearchCursor(in_fc, ['SHAPE@']) as in_cur, \
          arcpy.da.InsertCursor(out_fc, ['SHAPE@']) as out_cur:
         for row in in_cur:
-            shadow_geometry()
+            arcpy.insertRow([shadow_geometry(row[0], xadd, yadd, in_sr)])
