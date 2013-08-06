@@ -51,6 +51,7 @@ class MakeShadows(object):
         length_units.datatype = u'String'
         length_units.filter.list = ['Map Units', 'Meters']
         length_units.value = 'Map Units'
+        length_units.enabled = False
 
         return [in_layer, out_fc, shadow_angle, shadow_length, length_units]
 
@@ -66,13 +67,18 @@ class MakeShadows(object):
     def execute(self, parameters, messages):
         raise NotImplementedError("Sorry.")
 
-def makeshadows(in_fc, out_fc, angle, length):
+def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
     in_sr = arcpy.Describe(in_fc).spatialReference
     arcpy.management.CreateFeatureclass(os.path.dirname(out_fc),
                                         os.path.basename(out_fc),
                                         'POLYGON',
                                         spatial_reference=in_sr)
+    if is_meters:
+        length /= in_sr.metersPerUnit
     radian_angle = math.radians(angle)
     xmul, ymul = math.sin(radian_angle), math.cos(radian_angle)
     xadd, yadd = length * xmul, length * ymul
-    with arcpy.da.SearchCursor(in_fc, ['SHAPE@']) as in_cur:
+    with arcpy.da.SearchCursor(in_fc, ['SHAPE@']) as in_cur, \
+         arcpy.da.InsertCursor(out_fc, ['SHAPE@']) as out_cur:
+        for row in in_cur:
+            shadow_geometry()
