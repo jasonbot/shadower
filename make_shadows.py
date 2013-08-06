@@ -75,6 +75,8 @@ class MakeShadows(object):
         out_fc.parameterType = 'Required'
         out_fc.direction = 'Output'
         out_fc.datatype = u'Feature Class'
+        out_fc.symbology = os.path.join(os.path.dirname(__file__),
+                                        "shadow_symbology.lyr")
 
         shadow_angle = arcpy.Parameter()
         shadow_angle.name = u'shadow_angle'
