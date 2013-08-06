@@ -3,6 +3,8 @@ Make Shadows Geoprocessing Tool for ArcGIS 10.2 (and maybe 10.1, I don't know I 
 
 I'm bored and I'm waiting for a repro case for a bug that is "priority," so here's something I'm killing time with as I wait.
 
+![Sample output](https://raw.github.com/jasonbot/shadower/master/sample_output.png)
+
 You can get shadows, like under buildings! You provide an angle and a shadow length and then this is all pretty obvious why am I explaining it.
 
 License
