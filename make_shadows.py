@@ -69,9 +69,9 @@ class MakeShadows(object):
 
 def geometry_slices(geometry, xadd, yadd):
     for pt in geometry.getPart(0):
-        yield (pt, arcpy.Point(pt.X + xadd, pt.Y + yadd))
         if pt is None:
             return
+        yield (pt, arcpy.Point(pt.X + xadd, pt.Y + yadd))
 
 def window(iterator, window_size):
     window = ()
@@ -83,7 +83,7 @@ def window(iterator, window_size):
 
 def shadow_geometry(geometry, xadd, yadd, in_sr):
     parts = []
-    for w1, w2 in window(geometry_slices(geometry)):
+    for w1, w2 in window(geometry_slices(geometry, xadd, yadd), 2):
         pt1, pt2 = w1
         pt3, pt4 = w2
         parts.append(
