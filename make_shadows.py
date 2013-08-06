@@ -26,7 +26,7 @@ def shadow_geometry(geometry, xadd, yadd, in_sr):
         parts.append(
             arcpy.Polygon(
                 arcpy.Array(
-                    arcpy.Array([pt1, pt2, pt3, pt4, pt1])),
+                    arcpy.Array([pt1, pt2, pt4, pt3, pt1])),
                 in_sr))
     return reduce(lambda x, y: x.union(y), parts)
 
