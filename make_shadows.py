@@ -20,6 +20,7 @@ def window(iterator, window_size):
 
 def shadow_geometry(geometry, xadd, yadd, in_sr):
     parts = []
+    first_points = []
     for w1, w2 in window(geometry_slices(geometry, xadd, yadd), 2):
         pt1, pt2 = w1
         pt3, pt4 = w2
@@ -28,6 +29,9 @@ def shadow_geometry(geometry, xadd, yadd, in_sr):
                 arcpy.Array(
                     arcpy.Array([pt1, pt2, pt4, pt3, pt1])),
                 in_sr))
+        first_points.append(pt1)
+    parts.append(arcpy.Polygon(arcpy.Array(arcpy.Array(first_points)),
+                 in_sr))
     return reduce(lambda x, y: x.union(y), parts)
 
 def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
@@ -48,7 +52,7 @@ def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
          arcpy.da.InsertCursor(out_fc, ['SHAPE@']) as out_cur:
         for row_idx, row in enumerate(in_cur):
             out_cur.insertRow([shadow_geometry(row[0], xadd, yadd, in_sr)])
-            if row_idx % 100 == 1:
+            if row_idx % 20 == 1:
                 arcpy.SetProgressorPosition(row_idx)
 
 class Toolbox(object):
