@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import math
+import os
 
 import arcpy
 
@@ -40,10 +41,14 @@ def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
     radian_angle = math.radians(angle)
     xmul, ymul = math.sin(radian_angle), math.cos(radian_angle)
     xadd, yadd = length * xmul, length * ymul
+    row_count = arcpy.management.GetCount(in_fc)[0]
+    arcpy.SetProgressor("step", "Shadowing", 1, row_count, 1)
     with arcpy.da.SearchCursor(in_fc, ['SHAPE@']) as in_cur, \
          arcpy.da.InsertCursor(out_fc, ['SHAPE@']) as out_cur:
-        for row in in_cur:
-            arcpy.insertRow([shadow_geometry(row[0], xadd, yadd, in_sr)])
+        for row_idx, row in enumerate(in_cur):
+            out_cur.insertRow([shadow_geometry(row[0], xadd, yadd, in_sr)])
+            if row_idx % 100 == 1:
+                arcpy.SetProgressorPosition(row_idx)
 
 class Toolbox(object):
     def __init__(self):
@@ -55,6 +60,7 @@ class MakeShadows(object):
     def __init__(self):
         self.label = u'Make Shadows'
         self.canRunInBackground = False
+
     def getParameterInfo(self):
         in_layer = arcpy.Parameter()
         in_layer.name = u'in_layer'
@@ -67,7 +73,7 @@ class MakeShadows(object):
         out_fc.name = u'out_fc'
         out_fc.displayName = u'Output Feature Class'
         out_fc.parameterType = 'Required'
-        out_fc.direction = 'Input'
+        out_fc.direction = 'Output'
         out_fc.datatype = u'Feature Class'
 
         shadow_angle = arcpy.Parameter()
@@ -108,4 +114,8 @@ class MakeShadows(object):
         pass
 
     def execute(self, parameters, messages):
-        raise NotImplementedError("Sorry.")
+        in_fc = parameters[0].valueAsText
+        out_fc = parameters[1].valueAsText
+        angle = parameters[2].value
+        length = parameters[3].value
+        make_shadows(in_fc, out_fc, angle, length, is_meters=False)
