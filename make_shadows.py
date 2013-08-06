@@ -61,3 +61,6 @@ class MakeShadows(object):
 
     def execute(self, parameters, messages):
         raise NotImplementedError("Sorry.")
+
+def makeshadows(in_fc, out_fc, angle, length):
+    arcpy.AddMessage("HI! {} {} {} {}".format(in_fc, out_fc, angle, length))
