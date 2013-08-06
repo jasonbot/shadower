@@ -41,7 +41,7 @@ class MakeShadows(object):
         shadow_length.parameterType = 'Required'
         shadow_length.direction = 'Input'
         shadow_length.datatype = u'Double'
-        shad_length.value = 0.0125
+        shadow_length.value = 0.0125
 
         length_units = arcpy.Parameter()
         length_units.name = u'length_units'
