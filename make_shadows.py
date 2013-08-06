@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import math
+
 import arcpy
 
 class Toolbox(object):
@@ -39,6 +41,7 @@ class MakeShadows(object):
         shadow_length.parameterType = 'Required'
         shadow_length.direction = 'Input'
         shadow_length.datatype = u'Double'
+        shad_length.value = 0.0125
 
         length_units = arcpy.Parameter()
         length_units.name = u'length_units'
@@ -46,7 +49,8 @@ class MakeShadows(object):
         length_units.parameterType = 'Required'
         length_units.direction = 'Input'
         length_units.datatype = u'String'
-        length_units.filter.list = [u'Map Units', u'Meters']
+        length_units.filter.list = ['Map Units', 'Meters']
+        length_units.value = 'Map Units'
 
         return [in_layer, out_fc, shadow_angle, shadow_length, length_units]
 
@@ -63,4 +67,12 @@ class MakeShadows(object):
         raise NotImplementedError("Sorry.")
 
 def makeshadows(in_fc, out_fc, angle, length):
-    arcpy.AddMessage("HI! {} {} {} {}".format(in_fc, out_fc, angle, length))
+    in_sr = arcpy.Describe(in_fc).spatialReference
+    arcpy.management.CreateFeatureclass(os.path.dirname(out_fc),
+                                        os.path.basename(out_fc),
+                                        'POLYGON',
+                                        spatial_reference=in_sr)
+    radian_angle = math.radians(angle)
+    xmul, ymul = math.sin(radian_angle), math.cos(radian_angle)
+    xadd, yadd = length * xmul, length * ymul
+    with arcpy.da.SearchCursor(in_fc, ['SHAPE@']) as in_cur:
