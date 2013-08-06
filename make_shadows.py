@@ -41,8 +41,9 @@ def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
     radian_angle = math.radians(angle)
     xmul, ymul = math.sin(radian_angle), math.cos(radian_angle)
     xadd, yadd = length * xmul, length * ymul
-    row_count = arcpy.management.GetCount(in_fc)[0]
-    arcpy.SetProgressor("step", "Shadowing", 1, row_count, 1)
+    row_count = int(arcpy.management.GetCount(in_fc)[0])
+    arcpy.AddMessage("Shadowing {} features".format(row_count))
+    arcpy.SetProgressor("step", "Shadowing", 0, row_count)
     with arcpy.da.SearchCursor(in_fc, ['SHAPE@']) as in_cur, \
          arcpy.da.InsertCursor(out_fc, ['SHAPE@']) as out_cur:
         for row_idx, row in enumerate(in_cur):
@@ -52,7 +53,6 @@ def make_shadows(in_fc, out_fc, angle, length, is_meters=False):
 
 class Toolbox(object):
     def __init__(self):
-        self.label = u'Create Shadows'
         self.alias = u'shadows'
         self.tools = [MakeShadows]
 
